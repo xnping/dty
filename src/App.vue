@@ -13,8 +13,8 @@
           :router="router"
         >
           <el-menu-item index="/">首页</el-menu-item>
-          <el-menu-item index="/news">新闻资讯</el-menu-item>
           <el-menu-item index="/product">业务介绍</el-menu-item>
+          <el-menu-item index="/news">新闻资讯</el-menu-item>
           <!-- <el-menu-item index="/case">经典案例</el-menu-item> -->
           <el-menu-item index="/goin">走进达通源</el-menu-item>
         </el-menu>
@@ -42,8 +42,7 @@
               <span>地址：深圳市光明区公明街道上村社区长春北路1A栋301</span>
             </li>
           </ul>
-          <img src="./assets/img/ercode.png" alt />
-          <img src="./assets/img/ercode.png" alt />
+          <img src="./assets/img/adress.png" alt style="width: 25vw;transform: translateX(7vw);"/>
         </div>
       </div>
     </el-container>
@@ -114,7 +113,7 @@ body {
 
 .footer-content {
     width: 90%;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding-top: 20px;
     display: flex;

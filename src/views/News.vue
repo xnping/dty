@@ -21,20 +21,11 @@
         </div>
 
         <div class="content-nav-item">
-          <div class="item-list" v-for="(item,index) in newsList" :key="index">
-            <div class="item-img" v-lazy:background-image=" item.filePath"></div>
+          <router-link class="item-list" v-for="(item,index) in newsList" :key="index" :to="{ name: 'newsdetails', params: { item: item }}" >
+            <div class="item-img" style="background-position-y: 1px;" v-lazy:background-image=" item.filePath"></div>
 
-            <p class="item-list-title">{{item.title}}</p>
-            <p class="item-list-content">{{item.content}}</p>
-            <div class="item-list-more">
-              <router-link
-                :to="{ name: 'newsdetails', params: { item: item }}"
-              >
-                <img src="../assets/img/sanjiao.png" />
-                <span>more</span>
-              </router-link>
-            </div>
-          </div>
+            <span class="item-list-title">{{item.title}}</span>
+          </router-link>
         </div>
       </div>
     </div>
@@ -59,17 +50,16 @@ export default {
     loadData() {
       this.loading = true;
       this.$http
-        .get(`news/GetNewsAll`)
-        .then(response => {
+       .get(`news/GetNewsAll`)
+       .then(response => {
           this.newsList = response.data.data.records;
-           window.console.log(this.newsList)
           for(let a of this.newsList){
             a.filePath=this.imgserver+a.filePath
           }
 
           this.loading = false;
         })
-        .catch(function(error) {
+       .catch(function(error) {
           window.console.log(error);
         });
     }
@@ -102,19 +92,22 @@ export default {
     width: 100%;
 
     &-content {
-      width: 90vw; // 改为相对单位，占屏幕宽度的90%
+      width: 90vw;
       margin: 0 auto;
       background-color: #fff;
       border: 1px solid red;
 
-     .content-nav {
-        width: 80vw; // 改为相对单位，占屏幕宽度的80%
-        height: 8vh; // 改为相对单位，占屏幕高度的8%
+      // 新增导航栏整体淡入动画
+      animation: fadeInSectionContent 0.8s ease both;
+
+    .content-nav {
+        width: 80vw;
+        height: 8vh;
         margin: 0 auto;
         display: flex;
         align-items: center;
         position: relative;
-        bottom: 3vh; // 改为相对单位，占屏幕高度的3%
+        bottom: 3vh;
         border: 1px solid red;
 
         &-btn {
@@ -125,37 +118,54 @@ export default {
           justify-content: center;
           background-color: #e4e4e4;
           transition: all 0.2s;
+          // 优化导航按钮淡入动画，增加延迟和弹性效果
+          animation: fadeInNavBtn 0.6s ease both;
+          animation-delay: 0.2s;
+
+          &:hover {
+            // 新增导航按钮悬停时的缩放动画
+            animation: scaleOnHover 0.3s ease both;
+          }
         }
 
-       .content-nav-active {
+      .content-nav-active {
           background-color: red;
           color: #fff;
+          // 优化选中导航按钮的脉冲动画，增加弹性效果
+          animation: pulseActive 0.6s ease both;
         }
       }
 
-     .content-nav-item {
+    .content-nav-item {
         width: 100%;
         margin: 0 auto;
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
 
-       .item-list {
-          width: 35vw; // 改为相对单位，占屏幕宽度的30%
-          height: 45vh; // 改为相对单位，占屏幕高度的45%
+      .item-list {
+          width: 35vw;
+          height: 45vh;
           display: flex;
           justify-content: center;
           align-items: center;
-          margin: 2vh 1vw; // 改为相对单位，外边距上下为屏幕高度的2%，左右为屏幕宽度的1%
-          border: 1px solid #15669e;
+          background-color: #efefef;
+          margin: 2vh 1vw;
+          transition: all 0.3s ease;
+          // 优化新闻列表项淡入向上动画，增加弹性效果
+          animation: fadeInUpItem 0.8s ease both;
+          animation-delay: 0.3s;
 
           &:hover {
-            border: 1px solid #fff;
             box-shadow: 0 0 5px 2px #bfd3e0;
+            transform: scale(1.05);
+            // 新增新闻列表项悬停时的背景色渐变动画
+            animation: bgColorGradientOnHover 0.5s ease both;
           }
-         .item-img {
+
+        .item-img {
             width: 100%;
-            height: 60%; // 占item-list高度的60%，保持宽高比自适应
+            height: 100%;
             background-color: #cecece;
             background-repeat: no-repeat;
             background-size: cover;
@@ -163,25 +173,25 @@ export default {
             background-origin: content-box;
           }
 
-          &-title {
+        .item-list-title {
             width: 100%;
-            height: 12vh; // 改为相对单位，占屏幕高度的12%
+            height: 12vh;
             color: #15669e;
-            font-size: 2.5vw; // 改为相对单位，根据屏幕宽度调整字体大小
+            font-size: 2.5vw;
             padding: 0 2vw;
             margin: 2vh 0;
             overflow: hidden;
             text-overflow: ellipsis;
-            border-left: 1px solid #15669e;
+            // 新增标题文字在加载时的淡入动画
+            animation: fadeInTitle 0.6s ease both;
+            animation-delay: 0.4s;
           }
 
-          &-content {
+        .item-content {
             width: 100%;
-            height: 30vh; // 改为相对单位，占屏幕高度的30%
-            font-size: 1.5vw; // 改为相对单位，根据屏幕宽度调整字体大小
+            height: 30vh;
+            font-size: 1.5vw;
             color: gray;
-
-            // 文本长度处理 begin
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
@@ -189,18 +199,17 @@ export default {
             -webkit-box-orient: vertical;
             white-space: normal!important;
             word-wrap: break-word;
-            // 文本长度处理 ending
           }
 
-          &-more {
+        .item-more {
             width: 100%;
-            padding-top: 2vh; 
+            padding-top: 2vh;
             display: flex;
             justify-content: flex-start;
             align-items: center;
 
             img {
-              width: 2vw; 
+              width: 2vw;
               height: 2vw;
             }
             span {
@@ -212,50 +221,128 @@ export default {
       }
     }
   }
- .text-decoration {
-    text-decoration: none;
+
+  // 新增动画定义
+  @keyframes fadeInSectionContent {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInNavBtn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleOnHover {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.08);
+    }
+  }
+
+  @keyframes pulseActive {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.15);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes fadeInUpItem {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes bgColorGradientOnHover {
+    from {
+      background-color: #efefef;
+    }
+    to {
+      background-color: #cceeff;
+    }
+  }
+
+  @keyframes fadeInTitle {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   // 媒体查询，针对不同屏幕尺寸进行样式调整
   @media screen and (max-width: 768px) {
-   .news {
+  .news {
       &-section {
         &-content {
-         .content-nav {
-            width: 90vw; // 在小屏幕下进一步调整导航宽度占比，占屏幕宽度的90%
-            height: 10vh; // 在小屏幕下进一步调整导航高度占比，占屏幕高度的10%
-            bottom: 2vh; // 在小屏幕下进一步调整导航相对位置，占屏幕高度的2%
+        .content-nav {
+            width: 90vw;
+            height: 10vh;
+            bottom: 2vh;
 
             &-btn {
-              font-size: 2.5vw; // 在小屏幕下调整按钮字体大小，根据屏幕宽度调整字体大小
+              font-size: 2.5vw;
+              // 调整导航按钮在小屏幕下的淡入动画延迟
+              animation: fadeInNavBtn 0.4s ease both;
+              animation-delay: 0.1s;
             }
           }
 
-         .content-nav-item {
-           .item-list {
-              width: 90vw; 
-              height: 50vh; 
-              margin: 2vh 0; 
+        .content-nav-item {
+          .item-list {
+              width: 90vw;
+              height: 50vh;
+              margin: 2vh 0;
 
               &-title {
-                height: 8vh; 
-                font-size: 5vw; 
+                height: 8vh;
+                font-size: 5vw;
+                // 调整标题文字在小屏幕下的淡入动画延迟
+                animation: fadeInTitle 0.4s ease both;
+                animation-delay: 0.2s;
               }
 
               &-content {
-                height: 30vh; 
-                font-size: 2.5vw; 
-                -webkit-line-clamp: 1; 
+                height: 30vh;
+                font-size: 2.5vw;
+                -webkit-line-clamp: 1;
               }
 
               &-more {
-                padding-top: 3vh; // 在小屏幕下进一步调整更多信息区域的上边距，占屏幕高度的3%
+                padding-top: 3vh;
                 img {
-                  width: 4vw; // 在小屏幕下进一步调整箭头图标大小，根据屏幕宽度调整大小
+                  width: 4vw;
                   height: 4vw;
                 }
                 span {
-                  font-size: 3vw; // 在小屏幕下进一步调整更多信息文字大小，根据屏幕宽度调整字体大小
+                  font-size: 3vw;
                 }
               }
             }
@@ -266,21 +353,24 @@ export default {
   }
 
   @media screen and (min-width: 769px) and (max-width: 1024px) {
-   .news {
+  .news {
       &-section {
         &-content {
-         .content-nav {
+        .content-nav {
             width: 85vw;
             height: 7vh;
             bottom: 2.5vh;
 
             &-btn {
               font-size: 2vw;
+              // 调整导航按钮在中等屏幕下的淡入动画延迟
+              animation: fadeInNavBtn 0.6s ease both;
+              animation-delay: 0.15s;
             }
           }
 
-         .content-nav-item {
-           .item-list {
+        .content-nav-item {
+          .item-list {
               width: 40vw;
               height: 50vh;
               margin: 2vh 1vw;
@@ -288,6 +378,9 @@ export default {
               &-title {
                 height: 10vh;
                 font-size: 3vw;
+                // 调整标题文字在中等屏幕下的淡入动画延迟
+                animation: fadeInTitle 0.6s ease both;
+                animation-delay: 0.20s;
               }
 
               &-content {
@@ -314,10 +407,10 @@ export default {
   }
 
   @media screen and (min-width: 1025px) {
-   .news {
+  .news {
       &-section {
         &-content {
-         .content-nav {
+        .content-nav {
             width: 400px;
             height: 55px;
             margin: 0 auto;
@@ -335,35 +428,64 @@ export default {
               justify-content: center;
               background-color: #e4e4e4;
               transition: all 0.2s;
+              // 调整导航按钮在大屏幕下的淡入动画延迟
+              animation: fadeInNavBtn 0.4s ease both;
+              animation-delay: 0.3s;
             }
 
-           .content-nav-active {
+          .content-nav-active {
               background-color: red;
               color: #fff;
+              // 调整选中导航按钮的脉冲动画在大屏幕下的弹性效果
+              animation: pulseActive 0.3s ease both;
+              animation-delay: 0.1s;
             }
           }
 
-         .content-nav-item {
-           .item-list {
-              width: 330px;
-              height: 500px;
+        .content-nav-item {
+            padding-bottom: 6vw;
+          .item-list {
+              text-decoration: none;
+              color: inherit;
+              width: 400px;
+              height: 350px;
               display: flex;
               flex-direction: column;
               justify-content: center;
               align-items: center;
-              margin: 10px 10px;
-              border: 1px solid #15669e;
+              margin: 10px 15px;
+              transition: all 0.3s ease;
+              // 调整新闻列表项在大屏幕下的淡入向上动画延迟
+              animation: fadeInUpItem 0.8s ease both;
+              animation-delay: 0.4s;
+
+              &:hover {
+              .item-list-title {
+                  color: white;
+                }
+                background-color: #3388ff!important;
+                transform: scale(1.05);
+                // 调整新闻列表项悬停时的背景色渐变动画在大屏幕下的效果
+                animation: bgColorGradientOnHover 0.5s ease both;
+                animation-delay: 0.4s;
+              }
 
               &-title {
-                width: 300px;
-                height: 60px;
+                text-decoration: none!important;
+                width: 100%;
+                height: 3vw;
+                line-height: 3vw;
+                font-family: '宋体', sans-serif;
+                text-align: center;
+                margin: 0;
                 color: #15669e;
                 font-size: 22px;
-                padding: 0 10px;
-                margin: 20px 0;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                border-left: 1px solid #15669e;
+                padding-bottom: 3px;
+                // 调整标题文字在大屏幕下的淡入动画延迟
+                animation: fadeInTitle 0.2s ease both;
+                animation-delay: 0.1s;
               }
 
               &-content {
@@ -371,33 +493,13 @@ export default {
                 height: 100px;
                 font-size: 14px;
                 color: gray;
-
-                // 文本长度处理 begin
-                overflow: hidden;
+                overflow:  334;
                 text-overflow: ellipsis;
                 display: -webkit-box;
                 -webkit-line-clamp: 3;
                 -webkit-box-orient: vertical;
                 white-space: normal!important;
                 word-wrap: break-word;
-                // 文本长度处理 ending
-              }
-
-              &-more {
-                width: 273px;
-                padding-top: 20px;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-
-                img {
-                  width: 12px;
-                  height: 12px;
-                }
-                span {
-                  color: #e13834;
-                  padding: 0 5px;
-                }
               }
             }
           }
@@ -406,5 +508,4 @@ export default {
     }
   }
 }
-
 </style>

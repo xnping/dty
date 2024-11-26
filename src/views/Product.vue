@@ -27,11 +27,25 @@
         </div>
        
     </div>
-    <div class="item-content-box">
+
+
+    <div class="slip">
+      <span class="slip-detail">业务详情</span>
+    </div>
+    
+    <div class="item-content-box" >
       <div
           class="item-list-content"
           v-show="isContentVisible"
-        >介绍：{{ content }}</div>
+          :key="imgSrc"
+        >
+        <div class="item-list-img">
+          <img :src="imgSrc" alt="" style="width: 100%;">
+        </div>
+        <div class="item-list-text">
+          <span style="font-weight: 600;">业务介绍：</span>{{ content }}
+        </div>
+        </div>
       </div>
     </div>
    
@@ -47,6 +61,7 @@ export default {
       videoSrc: "http://www.shkjem.com/video/kj.mp4",
       newsList: [],
       content:[],
+      imgSrc:"",
       playerOptions: {
         playbackRates: [0.5, 1.0, 1.5, 2.0, 4.0, 8.0], //可选择的播放速度
         autoplay: false, //如果true,浏览器准备好时开始回放。
@@ -80,39 +95,52 @@ export default {
   },
   mounted() {
     this.loadData();
-    // 初始化isContentVisible数组，长度与newsList相同，初始值都为false
-    this.newsList.forEach(() => {
-      this.isContentVisible.push(false);
-    });
-   
   },
   methods: {
     loadData() {
       this.loading = true;
       this.$http
-      .get(`business/list`)
-      .then(response => {
-          //console.log(response);
+        .get(`business/list`)
+        .then(response => {
           this.newsList = response.data.data;
-          for(let obj of this.newsList){
-            obj.filePath=this.imgserver+obj.filePath
+          for (let obj of this.newsList) {
+            obj.filePath = this.imgserver + obj.filePath;
           }
-          this.content = this.newsList[0].description
+          // 设置第一个内容的图片和描述
           this.loading = false;
-          //window.console.log(this.newsList);
+
+          // 初始化isContentVisible数组，长度与newsList相同，初始值都为false
+          this.isContentVisible = Array(this.newsList.length).fill(false);
+          // 设置第一个内容为可见
+          setTimeout(() => {
+            this.imgSrc = this.newsList[0].filePath;
+            this.content = this.newsList[0].description;
+            this.isContentVisible[0] = true;
+            this.$nextTick(() => {
+              document.querySelector('.item-list-content').classList.add('active');
+            });
+          }, 500);
+
+          
         })
-      .catch(function (error) {
+        .catch(function (error) {
           window.console.log(error);
         });
     },  
     routeLink(row) {
       this.$router.push({ name: "Tabe", query: { id: row } });
     },
-  showContent(index) {
-    const item  = this.newsList[index];
-    this.content = item.description
-    this.isContentVisible = true;
-  },
+    showContent(index) {
+      const item = this.newsList[index];
+      this.content = item.description;
+      console.log(item.filePath);
+      this.imgSrc = item.filePath;
+      this.isContentVisible = true;
+      // 添加以下代码，为显示内容的盒子添加active类名以触发动画
+      this.$nextTick(() => {
+        document.querySelector('.item-list-content').classList.add('active');
+      });
+    }
   },
   created() {
     this.$http
@@ -135,6 +163,60 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// 动画定义
+@keyframes slideIn {
+  from {
+    transform: translateX(-8vw);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(8vw);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slip {
+  width: 80%;
+  height: 3vw;
+  background-color: #f5f5f5;
+  transform: translateX(8vw);
+  animation: slideIn 0.5s ease;
+
+.slip-detail {
+    font-size: 1.5vw;
+    color: #3388ff;
+    width: 10vw;
+    border-top: 4px solid #3388ff;
+    background-color: white;
+    text-align: center;
+    line-height: 3vw;
+    height: inherit;
+    display: block;
+  }
+}
+
 .product {
   width: 100%;
   height: 100%;
@@ -142,45 +224,49 @@ export default {
 }
 
 .product-content {
-  width: 80vw; // 改为相对单位，占屏幕宽度的90%
+  width: 80vw;
   margin: 0 auto;
   background-color: #fff;
 }
 
 .p-video {
-  width: 50vw; // 改为相对单位，占屏幕宽度的80%
+  width: 50vw;
   margin: 0 auto;
-  padding: 5vh 0; // 改为相对单位，上下内边距为屏幕高度的5%
+  padding: 5vh 0;
 }
 
 .content-modular-item {
   width: 100%;
   margin: 0 auto;
-  display: flex; // 修改为flex布局
-  flex-direction: row; // 设置为水平排列
+  display: flex;
+  flex-direction: row;
   justify-content: center;
   flex-wrap: wrap;
 
- .item-list {
-    width: 20vw; // 改为相对单位，占屏幕宽度的30%
-    height: 30vh; // 改为相对单位，占屏幕高度的45%
+.item-list {
+    width: 20vw;
+    height: 30vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    background-color: #efefef;
     align-items: center;
-    margin: 2vh 1vw; // 改为相对单位，外边距上下为屏幕高度的2%，左右为屏幕宽度的1%
-    border: 1px solid #15669e;
-    
+    margin: 2vh 1vw;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.5s ease;
 
     &:hover {
-      border: 1px solid #fff;
-      box-shadow: 0 0 5px 2px #bfd3e0;
+      background-color: lightblue;
+   .item-list-title {
+        color: white!important;
+      }
+      transform: translateY(-5px);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
     }
-    
 
-   .item-img {
+ .item-img {
       width: 100%;
-      height: 80%; // 占item-list高度的60%，保持宽高比自适应
+      height: 86%;
       background-color: #cecece;
       background-repeat: no-repeat;
       background-size: cover;
@@ -188,25 +274,24 @@ export default {
       background-origin: content-box;
     }
 
-    &-title {
+ .item-list-title {
       width: 100%;
-      height: 2.1vh; // 改为相对单位，占屏幕高度的12%
-      color: #15669e;
-      font-size: 0.8vw; // 改为相对单位，根据屏幕宽度调整字体大小
-      padding: 0 2vw;
-      margin: 2vh 0;
-      overflow: hidden;
+      height: 2.1vh;
+      color: black;
+      font-size: 1vw;
+      padding: 0 3vw;
+      padding-bottom: 0.5vh;
+      margin: 1vh 0;
       text-overflow: ellipsis;
-      border-left: 1px solid #15669e;
+      text-align: center;
+      transition: all 0.3s ease;
     }
 
-    &-content {
+ .item-content {
       width: 100%;
-      height: 30vh; // 改为相对单位，占屏幕高度的30%
-      font-size: 1.5vw; // 改为相对单位，根据屏幕宽度调整字体大小
+      height: 30vh;
+      font-size: 1.5vw;
       color: gray;
-
-      // 文本长度处理 begin
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
@@ -214,15 +299,20 @@ export default {
       -webkit-box-orient: vertical;
       white-space: normal!important;
       word-wrap: break-word;
-      // 文本长度处理 ending
+      opacity: 0;
+      transition: all 0.3s ease;
+      transform: translateY(10px);
     }
 
-    &-more {
+ .item-more {
       width: 100%;
       padding-top: 2vh;
       display: flex;
       justify-content: flex-start;
       align-items: center;
+      opacity: 0;
+      transition: all 0.3s ease;
+      transform: translateY(10px);
 
       img {
         width: 2vw;
@@ -234,184 +324,217 @@ export default {
       }
     }
   }
+
+  &:hover {
+ .item-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+ .item-more {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
-.item-content-box{
+
+.item-content-box {
   width: 100%;
   margin: 0 auto;
-  display: flex; // 修改为flex布局
-  flex-direction: row; // 设置为水平排列
-  justify-content: center;
+  display: flex;
+  flex-direction: column; // 修改为列布局
+  justify-content: center; // 垂直居中
+  align-items: center; // 水平居中
 
-  .item-list-content{
-  
-    width: 50%;
-      height: 30vh; // 改为相对单位，占屏幕高度的30%
-      font-size: 1vw; // 改为相对单位，根据屏幕宽度调整字体大小
-      color: gray;
+.item-list-content {
+    width: 80%; // 适当调整宽度
+    transform: translateX(0); // 移除不必要的偏移
+    display: flex;
+    justify-content: space-between;
+    height: 30vh;
+    font-size: 1vw;
+    color: gray;
+    height: 50vw;
+    transition: all 0.5s ease;
+    animation: fadeInLeft 0.5s ease;
+    opacity: 0;
+    transform: translateX(-20px);
 
-      // 文本长度处理 begin
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 5;
-      -webkit-box-orient: vertical;
-      white-space: normal!important;
-      word-wrap: break-word;
+    &.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+ .item-list-img {
+      width: 50%;
+      height: 30vw;
+      display: block;
+    }
+
+ .item-list-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+ .item-list-text {
+      width: 50%;
+      font-family: '宋体', sans-serif;
+      padding: 1vw;
+      line-height: 1.5;
+      color: #333;
+      letter-spacing: 0.05em;
+    }
+  }
 }
-
-}
-
-
-
 
 //公共样式
 .title,
 .eTitle {
-  font-size: 4vw; // 改为相对单位，根据屏幕宽度调整字体大小
+  font-size: 4vw;
   font-weight: 400;
   color: 333;
   text-align: center;
 }
 
 .eTitle {
-  font-size: 3.5vw; // 改为相对单位，根据屏幕宽度调整字体大小
-  padding: 1vh 0; // 改为相对单位，上下内边距为屏幕高度的1%
+  font-size: 3.5vw;
+  padding: 1vh 0;
 }
 
 // 媒体查询，针对不同屏幕尺寸进行样式调整
 @media screen and (max-width: 768px) {
- .product {
+.product {
     &-content {
-      width: 95vw; // 在小屏幕下进一步调整内容宽度占比，占屏幕宽度的95%
+      width: 95vw;
     }
 
-   .p-video {
-      width: 90vw; // 在小屏幕下进一步调整视频宽度占比，占屏幕宽度的90%
-      padding: 4vh 0; // 在小屏幕下进一步调整上下内边距，占屏幕高度的4%
+ .p-video {
+      width: 90vw;
+      padding: 4vh 0;
     }
 
-   .lacking {
-      height: 50vh; // 在小屏幕下进一步调整高度占比，占屏幕 height的50%
-      padding: 3vh 0; // 在小屏幕下进一步调整上下内边距，占 screen height的3%
+ .lacking {
+      height: 50vh;
+      padding: 3vh 0;
 
-     .lacking-bottom {
-        padding: 6vh 6vw; // 在小屏幕下进一步调整内边距，占 screen height的6%，左右内边距为 screen width的6%
+   .lacking-bottom {
+        padding: 6vh 6vw;
 
-       .lacking-bottom-item {
-          width: 30vw; // 在小屏幕下进一步调整宽度占比，占 screen width的30%
+     .lacking-bottom-item {
+          width: 30vw;
 
-         .lacking-bottom-item-img {
-            width: 15vw; // 在小屏幕下进一步调整宽度占比，占 screen width的15%
-            height: 15vw; // 在小screen下进一步调整高度占比，占 screen height的15%
-            line-height: 20vw; // 在小screen下进一步调整行高，根据元素大小调整行高
+       .lacking-bottom-item-img {
+            width: 15vw;
+            height: 15vw;
+            line-height: 20vw;
           }
         }
         p {
-          font-size: 3vw; // 在小screen下进一步调整字体大小，根据 screen width调整字体大小
-          margin: 1.5vh 0; // 在小screen下进一步调整上下内边距，占 screen height的1.5%
+          font-size: 3vw;
+          margin: 1.5vh 0;
         }
       }
     }
 
-   .target {
-      margin-top: 4vh; // 在小screen下进一步调整上边距，占 screen height的4%
+ .target {
+      margin-top: 4vh;
 
       &-img {
-        margin-top: 4vh; // 在小screen下进一步调整上边距，占 screen height的4%
+        margin-top: 4vh;
       }
     }
 
-   .modular {
-      margin-top: 4vh; // 在小screen下进一步调整上边距，占 screen height的4%
+ .modular {
+      margin-top: 4vh;
 
-     .modular-content {
-        padding: 4vh 4vw; // 在小screen下进一步调整内边距，占 screen height的4%，左右内边距为 screen width的4%
+   .modular-content {
+        padding: 4vh 4vw;
       }
     }
 
-   .modular-content-same {
-      width: 35vw; // 在小screen下进一步调整宽度占比，占 screen width的35%
-      height: 45vh; // 在小screen下进一步调整高度占比，占 screen height的45%
+ .modular-content-same {
+      width: 35vw;
+      height: 45vh;
 
-     .same-item {
-        height: 12vh; // 在小screen下进一步调整 height占比，占 screen height的12%
-        padding: 1.5vh 0; // 在小screen下进一步调整上下内边距，占 screen height的1.5%
+   .same-item {
+        height: 12vh;
+        padding: 1.5vh 0;
 
-       .same-item-img {
-          width: 5vw; // 在小screen下进一步调整 width占比，占 screen width的12%
-          height: 5vw; // 在小screen下进一步调整 height占比，占 screen height的12%
-          line-height: 16vw; // 在小screen下进一步调整行高，根据 element size调整行高
+     .same-item-img {
+          width: 5vw;
+          height: 5vw;
+          line-height: 16vw;
         }
         p {
-          font-size: 3.5vw; // 在小screen下进一步调整 font size，根据 screen width调整字体大小
-          line-height: 12vh; // 在小screen下进一步调整行高，根据 element size调整行高
+          font-size: 3.5vw;
+          line-height: 12vh;
         }
       }
     }
 
-   .modular-content-center {
-      width: 50vw; // 在小screen下进一步调整 width占比，占 screen width的50%
-      height: 45vh; // 在小screen下进一步调整 height占比，占 screen height的45%
+ .modular-content-center {
+      width: 50vw;
+      height: 45vh;
       text-align: center;
     }
 
-   .title,
-   .eTitle {
-      font-size: 5vw; // 在小screen下进一步调整 font size，根据 screen width调整字体大小
+ .title,
+ .eTitle {
+      font-size: 5vw;
     }
-   .eTitle {
-      padding: 1.5vh 0; // 在小screen下进一步调整上下内边距，占 screen height的1.5%
+ .eTitle {
+      padding: 1.5vh 0;
     }
   }
 }
 
 @media screen and (min-width: 769px) and (max-width: 1024px) {
- .product {
+.product {
     &-content {
-      width: 85vw; // 在中等屏幕下调整 content width占比，占 screen width的85%
+      width: 85vw;
     }
 
-   .p-video {
-      width: 75vw; // 在中等屏幕下调整 video width占比，占 screen width的75%
-      padding: 4.5vh 0; // 在中等屏幕下调整上下内边距，占 screen height的4.5%
+ .p-video {
+      width: 75vw;
+      padding: 4.5vh 0;
     }
 
-   .lacking {
-      height: 45vh; // 在中等屏幕下调整 height占比，占 screen height的45%
-      padding: 2.5vh 0; // 在中等屏幕下调整上下内边距，占 screen height的2.5%
+ .lacking {
+      height: 45vh;
+      padding: 2.5vh 0;
 
-     .lacking-bottom {
-        padding: 7vh 7vw; // 在中等屏幕下调整内边距，占 screen height的7%，左右内边距为 screen width的7%
+   .lacking-bottom {
+        padding: 7vh 7vw;
 
-       .lacking-bottom-item {
-          width: 25vw; // 在中等屏幕下调整 width占比，占 screen width的25%
+     .lacking-bottom-item {
+          width: 25vw;
 
-         .lacking-bottom-item-img {
-            width: 14vw; // 在中等屏幕下调整 width占比，占 screen width的14%
-            height: 14vw; // 在中等屏幕下调整 height占比，占 screen height的14%
-            line-height: 18vw; // 在中等屏幕下调整行高，根据 element size调整行高
+       .lacking-bottom-item-img {
+            width: 14vw;
+            height: 14vw;
+            line-height: 18vw;
           }
         }
         p {
-          fontSize: 2.5vw; // 在中等屏幕下调整 font size，根据 screen width调整字体大小
-          margin: 1.2vh 0; // 在中等屏幕下调整上下内边距，占 screen height的1.2%
+          fontSize: 2.5vw;
+          margin: 1.2vh 0;
         }
       }
     }
 
-   .target {
-      margin-top: 4.5vh; // 在中等屏幕下调整上边距，占 screen height的4.5%
+ .target {
+      margin-top: 4.5vh;
 
       &-img {
-        margin-top: 4.5vh; // 在中等 screen下调整上边距，占 screen height的4.5%
+        margin-top: 4.5vh;
       }
     }
 
-   .modular {
-      margin-top: 4.5vh; // 在中等 screen下调整上边距，占 screen height的4.5%
+ .modular {
+      margin-top: 4.5vh;
 
-     .modular-content {
-        padding: 4.5vh 4.5vw; // 在中等 screen下调整内边距，占 screen height的4.5%，左右内边距为 screen width的4.5%
+   .modular-content {
+        padding: 4.5vh 4.5vw;
       }
     }
   }

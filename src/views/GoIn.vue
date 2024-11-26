@@ -3,7 +3,7 @@
     <banner img="../assets/img/bgtop.jpg" title="走进达通源" />
     <div class="section" v-loading="loading">
       <div class="section-content">
-        <div class="content-summary">
+        <div class="content-summary animate-on-scroll">
           <div class="summary-left">
             <p class="title">公司简介</p>
             <p class="eTitle">ABOUT US</p>
@@ -21,7 +21,7 @@
         </el-divider>
 
         <!-- 公司荣誉 -->
-        <div class="content-honor">
+        <div class="content-honor" >
           <div class="honor-big-img">
             <el-dialog :title="dialogTitle" :visible.sync="dialogTableVisible">
               <img v-lazy="dialogUrl" alt />
@@ -48,7 +48,7 @@
         </div>
 
         <!-- 合作伙伴 -->
-        <div class="content-partner">
+        <div class="content-partner animate-on-scroll" >
           <div class="top">
             <h3>合作伙伴</h3>
             <p>RARTNERS</p>
@@ -147,39 +147,47 @@ export default {
     };
   },
   mounted() {
-    this.$http
-      .all([
-        this.$http.get("honor/list"),
-        // this.$http.get("Enterprise/GetEnterpriseAll"),
-        // this.$http.get(`Team/GetTeamAll`),
-        // this.$http.get(`Course/GetCourseAll`)
-      ])
-      .then(
-        this.$http.spread((responseHonor) => {
-          //responseEnterprise, responseTeam, responseCourse
-          this.honorList = responseHonor.data.data;
-          for (let obj of this.honorList) {
-            obj.filePath = this.imgserver + obj.filePath;
-          }
-
-          // this.partnerImg = responseEnterprise.data;
-          // this.teamItem = responseTeam.data;
-
-          // var groupCount = Math.ceil(responseCourse.data.length / 2);
-          // for (let i = 0; i < groupCount; i++) {
-          //   let img2 = [];
-          //   for (let j = 0; j < 2; j++) {
-          //     if (responseCourse.data.length - 1 >= i * 2 + j) {
-          //       img2.push(responseCourse.data[i * 2 + j]);
-          //     }
-          //   }
-          //   this.courseList.push(img2);
-          // }
-          // window.console.log(this.courseList);
-          this.loading = false;
-        })
-      );
+      this.fetchData()
+      this.setupIntersectionObserver();
   },
+  methods: {
+    setupIntersectionObserver() {
+      const options = {
+        root: null, // 使用视口作为根
+        threshold: 0.1, // 10%可见时触发
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('fade-in'); // 添加动画类
+            observer.unobserve(entry.target); // 停止观察
+          }
+        });
+      }, options);
+
+      // 选择需要添加动画的元素
+      this.$nextTick(() => {
+        const elements = document.querySelectorAll('.animate-on-scroll');
+        elements.forEach((el) => observer.observe(el));
+      });
+    },
+    fetchData() {
+      this.$http
+        .all([
+          this.$http.get("honor/list"),
+        ])
+        .then(
+          this.$http.spread((responseHonor) => {
+            this.honorList = responseHonor.data.data;
+            for (let obj of this.honorList) {
+              obj.filePath = this.imgserver + obj.filePath;
+            }
+            this.loading = false;
+          })
+        );
+    },
+  }
 };
 </script>
 
@@ -379,6 +387,22 @@ export default {
       }
     }
   }
+}
+
+// 入场动画
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 1s forwards; // 动画持续时间为0.5秒
 }
 
 @keyframes imgboxkey {
